@@ -4,12 +4,15 @@ import "dotenv/config";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 
+import authRoutes from "@/src/routes/authRoutes";
+import { connectDB } from "./lib/db";
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     credentials: true,
   }),
 );
@@ -20,6 +23,10 @@ app.get("/", (req, res) => {
   res.send("API running");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.use("/api/auth", authRoutes);
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
