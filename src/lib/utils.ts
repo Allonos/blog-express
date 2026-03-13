@@ -13,7 +13,7 @@ export const generateToken = (userId: string, res: Response) => {
     expiresIn: "7d",
   });
 
-  res.cookie("token", token, {
+  res.cookie("blogToken", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
