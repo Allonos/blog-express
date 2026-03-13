@@ -1,5 +1,5 @@
 import express, { Response } from "express";
-import { login, logout, signup } from "@/src/controllers/auth/Signup";
+import { login, logout, signup } from "@/src/controllers/auth/authControllers";
 import { AuthRequest, protectRoute } from "@/src/middleware/protectRoute";
 
 const router = express.Router();
