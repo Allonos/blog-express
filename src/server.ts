@@ -3,10 +3,11 @@ import cors from "cors";
 import "dotenv/config";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
+import { connectDB } from "./lib/db";
 
 import authRoutes from "@/src/routes/authRoutes";
 import userRoutes from "@/src/routes/userRoutes";
-import { connectDB } from "./lib/db";
+import postRoutes from "@/src/routes/postRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/post", postRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
