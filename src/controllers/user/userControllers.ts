@@ -44,7 +44,7 @@ export const getUserByUsername = async (req: Request, res: Response) => {
   try {
     const users = await User.find({
       username: { $regex: username as string, $options: "i" },
-    }).select("-password");
+    });
 
     if (!users.length)
       return res.status(404).json({ message: "User not found" });

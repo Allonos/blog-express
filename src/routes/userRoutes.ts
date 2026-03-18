@@ -3,11 +3,12 @@ import {
   getUserByUsername,
   updateProfile,
 } from "../controllers/user/userControllers";
+import { protectRoute } from "../middleware/protectRoute";
 
 const router = express.Router();
 
-router.patch("/update/:id", updateProfile);
+router.patch("/update/:id", protectRoute, updateProfile);
 
-router.get("/find-user", getUserByUsername);
+router.get("/find-user", protectRoute, getUserByUsername);
 
 export default router;

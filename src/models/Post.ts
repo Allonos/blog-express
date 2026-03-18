@@ -6,7 +6,6 @@ const postSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxLength: 2000,
-      minLength: 10,
     },
     image: {
       type: String,
