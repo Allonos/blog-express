@@ -58,3 +58,31 @@ export const getAllPosts = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getPostsByUserId = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId).select(
+      "username email profilePic bio",
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const posts = await Post.find({ author: user._id })
+      .populate("author", "username profilePic")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      username: user.username,
+      email: user.email,
+      profilePic: user.profilePic,
+      bio: user.bio,
+      posts,
+    });
+  } catch (error) {
+    console.error("error in getPostsByUserId", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
