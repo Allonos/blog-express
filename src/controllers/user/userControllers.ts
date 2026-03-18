@@ -41,14 +41,15 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const getUserByUsername = async (req: Request, res: Response) => {
   const { username } = req.query;
 
-  console.log(username);
-
   try {
-    const user = await User.findOne({ username }).select("-password");
+    const users = await User.find({
+      username: { $regex: username as string, $options: "i" },
+    }).select("-password");
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!users.length)
+      return res.status(404).json({ message: "User not found" });
 
-    return res.status(200).json(user);
+    return res.status(200).json(users);
   } catch (error) {
     console.error("Error in getUserByUsername", error);
     return res.status(500).json({ message: "Internal Server Error" });
