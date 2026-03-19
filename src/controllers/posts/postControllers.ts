@@ -86,3 +86,29 @@ export const getPostsByUserId = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const deletePost = async (req: Request, res: Response) => {
+  const { postId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.author.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Post does not belong to the user" });
+    }
+
+    await post.deleteOne();
+
+    return res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    console.error("error in deletePost", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
