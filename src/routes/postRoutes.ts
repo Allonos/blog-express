@@ -3,6 +3,7 @@ import {
   createPost,
   deletePost,
   getAllPosts,
+  getPostById,
   getPostsByUserId,
   likePost,
 } from "@/src/controllers/posts/postControllers";
@@ -15,6 +16,8 @@ router.use(protectRoute);
 router.post("/create", createPost);
 
 router.get("/get-all-posts", getAllPosts);
+
+router.get("/get-post/:postId", getPostById);
 
 router.get("/get-posts-by-user/:userId", getPostsByUserId);
 

@@ -1,4 +1,5 @@
 import cloudinary from "@/src/lib/cloudinary";
+import Comment from "@/src/models/Comment";
 import Post from "@/src/models/Post";
 import User from "@/src/models/User";
 import { Response } from "express";
@@ -48,6 +49,11 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
   try {
     const posts = await Post.find()
       .populate("author", "username profilePic")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username profilePic" },
+        options: { sort: { createdAt: -1 } },
+      })
       .sort({ createdAt: -1 });
 
     if (!posts.length) {
@@ -57,6 +63,29 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
     return res.status(200).json(posts);
   } catch (error) {
     console.error("error in getAllPosts", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getPostById = async (req: AuthRequest, res: Response) => {
+  const { postId } = req.params;
+
+  try {
+    const post = await Post.findById(postId)
+      .populate("author", "username profilePic")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username profilePic" },
+        options: { sort: { createdAt: -1 } },
+      });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(200).json(post);
+  } catch (error) {
+    console.error("error in getPostById", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -74,6 +103,11 @@ export const getPostsByUserId = async (req: AuthRequest, res: Response) => {
 
     const posts = await Post.find({ author: user._id })
       .populate("author", "username profilePic")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username profilePic" },
+        options: { sort: { createdAt: -1 } },
+      })
       .sort({ createdAt: -1 });
 
     return res.status(200).json({

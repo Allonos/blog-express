@@ -8,6 +8,7 @@ import { connectDB } from "./lib/db";
 import authRoutes from "@/src/routes/authRoutes";
 import userRoutes from "@/src/routes/userRoutes";
 import postRoutes from "@/src/routes/postRoutes";
+import commentRoutes from "@/src/routes/commentRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
+app.use("/api/comment", commentRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
