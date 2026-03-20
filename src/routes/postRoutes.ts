@@ -4,6 +4,7 @@ import {
   deletePost,
   getAllPosts,
   getPostsByUserId,
+  likePost,
 } from "@/src/controllers/posts/postControllers";
 import { protectRoute } from "../middleware/protectRoute";
 
@@ -16,6 +17,8 @@ router.post("/create", createPost);
 router.get("/get-all-posts", getAllPosts);
 
 router.get("/get-posts-by-user/:userId", getPostsByUserId);
+
+router.post("/like/:postId", likePost);
 
 router.delete("/delete/:postId", deletePost);
 

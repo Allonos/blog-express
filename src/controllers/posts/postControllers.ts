@@ -1,12 +1,14 @@
 import cloudinary from "@/src/lib/cloudinary";
 import Post from "@/src/models/Post";
 import User from "@/src/models/User";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "@/src/middleware/protectRoute";
 
-export const createPost = async (req: Request, res: Response) => {
-  const { id, description, image } = req.body;
+export const createPost = async (req: AuthRequest, res: Response) => {
+  const { description, image } = req.body;
+  const id = req.user._id;
 
-  if (!id || !description) {
+  if (!description) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -42,7 +44,7 @@ export const createPost = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllPosts = async (req: Request, res: Response) => {
+export const getAllPosts = async (req: AuthRequest, res: Response) => {
   try {
     const posts = await Post.find()
       .populate("author", "username profilePic")
@@ -59,7 +61,7 @@ export const getAllPosts = async (req: Request, res: Response) => {
   }
 };
 
-export const getPostsByUserId = async (req: Request, res: Response) => {
+export const getPostsByUserId = async (req: AuthRequest, res: Response) => {
   const { userId } = req.params;
 
   try {
@@ -87,9 +89,37 @@ export const getPostsByUserId = async (req: Request, res: Response) => {
   }
 };
 
-export const deletePost = async (req: Request, res: Response) => {
+export const likePost = async (req: AuthRequest, res: Response) => {
   const { postId } = req.params;
-  const { userId } = req.body;
+  const userId = req.user._id.toString();
+
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (!post.likes) post.likes = [];
+    const alreadyLiked = post.likes.some((id) => id.toString() === userId);
+    if (alreadyLiked) {
+      post.likes = post.likes.filter((id) => id.toString() !== userId);
+    } else {
+      post.likes.push(userId);
+    }
+
+    await post.save();
+
+    return res.status(200).json({ likes: post.likes });
+  } catch (error) {
+    console.error("error in likePost", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const deletePost = async (req: AuthRequest, res: Response) => {
+  const { postId } = req.params;
+  const userId = req.user._id.toString();
 
   try {
     const post = await Post.findById(postId);
