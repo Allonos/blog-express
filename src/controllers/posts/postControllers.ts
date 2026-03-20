@@ -51,7 +51,10 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
       .populate("author", "username profilePic")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "username profilePic" },
+        populate: [
+          { path: "author", select: "username profilePic" },
+          { path: "replies.author", select: "username profilePic" },
+        ],
         options: { sort: { createdAt: -1 } },
       })
       .sort({ createdAt: -1 });
@@ -75,7 +78,10 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
       .populate("author", "username profilePic")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "username profilePic" },
+        populate: [
+          { path: "author", select: "username profilePic" },
+          { path: "replies.author", select: "username profilePic" },
+        ],
         options: { sort: { createdAt: -1 } },
       });
 
@@ -105,7 +111,10 @@ export const getPostsByUserId = async (req: AuthRequest, res: Response) => {
       .populate("author", "username profilePic")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "username profilePic" },
+        populate: [
+          { path: "author", select: "username profilePic" },
+          { path: "replies.author", select: "username profilePic" },
+        ],
         options: { sort: { createdAt: -1 } },
       })
       .sort({ createdAt: -1 });
