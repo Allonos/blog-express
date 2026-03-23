@@ -1,10 +1,13 @@
-import User from "@/src/models/User";
 import { Request, Response } from "express";
-import cloudinary from "@/src/lib/cloudinary";
+import {
+  updateUserProfile,
+  searchUsersByUsername,
+} from "@/src/services/user/userService";
+import { AppError } from "@/src/lib/AppError";
 
 export const updateProfile = async (req: Request, res: Response) => {
   const { username, bio, profilePic } = req.body;
-  const { id: userId } = req.params;
+  const userId = req.params.id as string;
 
   if (!username && !bio && !profilePic) {
     return res.status(400).json({
@@ -13,26 +16,12 @@ export const updateProfile = async (req: Request, res: Response) => {
   }
 
   try {
-    const updates: { username?: string; bio?: string; profilePic?: string } =
-      {};
-    if (username) updates.username = username;
-    if (bio) updates.bio = bio;
-    if (profilePic) {
-      const uploadResponse = await cloudinary.uploader.upload(profilePic);
-      updates.profilePic = uploadResponse.secure_url;
-    }
-
-    const user = await User.findOneAndUpdate({ _id: userId }, updates, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
+    const user = await updateUserProfile(userId, { username, bio, profilePic });
     return res.status(200).json(user);
   } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     console.error("Error in updateProfile", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
@@ -42,15 +31,12 @@ export const getUserByUsername = async (req: Request, res: Response) => {
   const { username } = req.query;
 
   try {
-    const users = await User.find({
-      username: { $regex: username as string, $options: "i" },
-    });
-
-    if (!users.length)
-      return res.status(404).json({ message: "User not found" });
-
+    const users = await searchUsersByUsername(username as string);
     return res.status(200).json(users);
   } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     console.error("Error in getUserByUsername", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }

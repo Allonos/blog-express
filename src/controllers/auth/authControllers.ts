@@ -1,7 +1,7 @@
-import User from "@/src/models/User";
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
 import { generateToken } from "@/src/lib/utils";
+import { signupUser, loginUser } from "@/src/services/auth/authService";
+import { AppError } from "@/src/lib/AppError";
 import "dotenv/config";
 
 export const signup = async (req: Request, res: Response) => {
@@ -23,31 +23,13 @@ export const signup = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ message: "Email already in use" });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    if (newUser) {
-      await newUser.save();
-      generateToken(newUser._id.toString(), res);
-
-      return res.status(201).json({
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-      });
-    }
+    const user = await signupUser(username, email, password);
+    generateToken(user._id.toString(), res);
+    return res.status(201).json(user);
   } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     console.error("Error in SignUp", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
@@ -61,26 +43,19 @@ export const login = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
+    const user = await loginUser(email, password);
     generateToken(user._id.toString(), res);
-
     return res.status(200).json({
       _id: user._id,
       email: user.email,
       username: user.username,
     });
   } catch (error) {
-    console.error(`error in login: ${error}`);
-    res.status(500).json({ message: "Internal Server Error" });
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    console.error("Error in login", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
