@@ -2,7 +2,12 @@ import cloudinary from "@/src/lib/cloudinary";
 import Post from "@/src/models/Post";
 import User from "@/src/models/User";
 import { AppError } from "@/src/lib/AppError";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
+
+interface GetAllPostsParams {
+  limit: number;
+  cursor?: string;
+}
 
 const commentPopulate = {
   path: "comments",
@@ -37,14 +42,27 @@ export const createPost = async (
   return newPost;
 };
 
-export const getAllPosts = async () => {
-  const posts = await Post.find()
+export const getAllPosts = async ({ limit, cursor }: GetAllPostsParams) => {
+  const query = cursor
+    ? { _id: { $lt: new mongoose.Types.ObjectId(cursor) } }
+    : {};
+
+  const posts = await Post.find(query)
     .populate("author", "username profilePic")
     .populate(commentPopulate)
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .limit(limit + 1);
+
+  const hasNextPage = posts.length > limit;
+  const data = hasNextPage ? posts.slice(0, limit) : posts;
+  const nextCursor = hasNextPage ? data[data.length - 1]._id.toString() : null;
 
   if (!posts.length) throw new AppError(404, "No posts found");
-  return posts;
+  return {
+    posts: data,
+    nextCursor,
+    hasNextPage,
+  };
 };
 
 export const getPostById = async (postId: string) => {
@@ -56,23 +74,43 @@ export const getPostById = async (postId: string) => {
   return post;
 };
 
-export const getPostsByUserId = async (userId: string) => {
+export const getPostsByUserId = async ({
+  userId,
+  limit,
+  cursor,
+}: {
+  userId: string;
+  limit: number;
+  cursor?: string;
+}) => {
+  const query = cursor
+    ? { _id: { $lt: new mongoose.Types.ObjectId(cursor) } }
+    : {};
   const user = await User.findById(userId).select(
     "username email profilePic bio",
   );
   if (!user) throw new AppError(404, "User not found");
 
-  const posts = await Post.find({ author: user._id })
+  const posts = await Post.find({ author: user._id, ...query })
     .populate("author", "username profilePic")
     .populate(commentPopulate)
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .limit(limit + 1);
+
+  const hasNextPage = posts.length > limit;
+  const data = hasNextPage ? posts.slice(0, limit) : posts;
+  const nextCursor = hasNextPage ? data[data.length - 1]._id.toString() : null;
+
+  if (!posts.length) throw new AppError(404, "No posts found for this user");
 
   return {
     username: user.username,
     email: user.email,
     profilePic: user.profilePic,
     bio: user.bio,
-    posts,
+    posts: data,
+    nextCursor,
+    hasNextPage,
   };
 };
 

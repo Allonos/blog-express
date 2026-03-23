@@ -21,7 +21,6 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       minLength: 10,
-      default: "",
     },
     profilePic: {
       type: String,

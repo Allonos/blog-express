@@ -30,9 +30,12 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllPosts = async (_req: AuthRequest, res: Response) => {
+export const getAllPosts = async (req: AuthRequest, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 10;
+  const cursor = req.query.cursor as string | undefined;
+
   try {
-    const posts = await getAllPostsService();
+    const posts = await getAllPostsService({ limit, cursor });
     return res.status(200).json(posts);
   } catch (error) {
     if (error instanceof AppError) {
@@ -60,10 +63,12 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
 
 export const getPostsByUserId = async (req: AuthRequest, res: Response) => {
   const userId = req.params.userId as string;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const cursor = req.query.cursor as string | undefined;
 
   try {
-    const data = await getPostsByUserIdService(userId);
-    return res.status(200).json(data);
+    const posts = await getPostsByUserIdService({ userId, limit, cursor });
+    return res.status(200).json(posts);
   } catch (error) {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
