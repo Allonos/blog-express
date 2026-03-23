@@ -2,11 +2,11 @@ import cloudinary from "@/src/lib/cloudinary";
 import Post from "@/src/models/Post";
 import User from "@/src/models/User";
 import { AppError } from "@/src/lib/AppError";
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 
 interface GetAllPostsParams {
   limit: number;
-  cursor?: string;
+  skip: number;
 }
 
 const commentPopulate = {
@@ -42,27 +42,19 @@ export const createPost = async (
   return newPost;
 };
 
-export const getAllPosts = async ({ limit, cursor }: GetAllPostsParams) => {
-  const query = cursor
-    ? { _id: { $lt: new mongoose.Types.ObjectId(cursor) } }
-    : {};
-
-  const posts = await Post.find(query)
-    .populate("author", "username profilePic")
-    .populate(commentPopulate)
-    .sort({ createdAt: -1 })
-    .limit(limit + 1);
-
-  const hasNextPage = posts.length > limit;
-  const data = hasNextPage ? posts.slice(0, limit) : posts;
-  const nextCursor = hasNextPage ? data[data.length - 1]._id.toString() : null;
+export const getAllPosts = async ({ limit, skip }: GetAllPostsParams) => {
+  const [posts, totalItems] = await Promise.all([
+    Post.find()
+      .populate("author", "username profilePic")
+      .populate(commentPopulate)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Post.countDocuments(),
+  ]);
 
   if (!posts.length) throw new AppError(404, "No posts found");
-  return {
-    posts: data,
-    nextCursor,
-    hasNextPage,
-  };
+  return { posts, totalItems };
 };
 
 export const getPostById = async (postId: string) => {
@@ -77,38 +69,34 @@ export const getPostById = async (postId: string) => {
 export const getPostsByUserId = async ({
   userId,
   limit,
-  cursor,
+  skip,
 }: {
   userId: string;
   limit: number;
-  cursor?: string;
+  skip: number;
 }) => {
-  const query = cursor
-    ? { _id: { $lt: new mongoose.Types.ObjectId(cursor) } }
-    : {};
   const user = await User.findById(userId).select(
     "username email profilePic bio",
   );
   if (!user) throw new AppError(404, "User not found");
 
-  const posts = await Post.find({ author: user._id, ...query })
-    .populate("author", "username profilePic")
-    .populate(commentPopulate)
-    .sort({ createdAt: -1 })
-    .limit(limit + 1);
-
-  const hasNextPage = posts.length > limit;
-  const data = hasNextPage ? posts.slice(0, limit) : posts;
-  const nextCursor = hasNextPage ? data[data.length - 1]._id.toString() : null;
+  const [posts, totalItems] = await Promise.all([
+    Post.find({ author: user._id })
+      .populate("author", "username profilePic")
+      .populate(commentPopulate)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Post.countDocuments({ author: user._id }),
+  ]);
 
   return {
     username: user.username,
     email: user.email,
     profilePic: user.profilePic,
     bio: user.bio,
-    posts: data,
-    nextCursor,
-    hasNextPage,
+    posts,
+    totalItems,
   };
 };
 

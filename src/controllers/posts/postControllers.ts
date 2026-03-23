@@ -9,6 +9,7 @@ import {
   deletePost as deletePostService,
 } from "@/src/services/posts/postService";
 import { AppError } from "@/src/lib/AppError";
+import { parsePagination } from "@/src/lib/pagination";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   const { description, image } = req.body;
@@ -31,12 +32,21 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 };
 
 export const getAllPosts = async (req: AuthRequest, res: Response) => {
-  const limit = parseInt(req.query.limit as string) || 10;
-  const cursor = req.query.cursor as string | undefined;
+  const { limit, skip } = parsePagination(req.query);
 
   try {
-    const posts = await getAllPostsService({ limit, cursor });
-    return res.status(200).json(posts);
+    const { posts, totalItems } = await getAllPostsService({ limit, skip });
+    const { page, totalPages, hasNextPage, isFirstPage, isLastPage } =
+      parsePagination(req.query, undefined, totalItems);
+
+    return res.status(200).json({
+      posts,
+      page,
+      totalPages,
+      hasNextPage,
+      isFirstPage,
+      isLastPage,
+    });
   } catch (error) {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
@@ -63,12 +73,26 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
 
 export const getPostsByUserId = async (req: AuthRequest, res: Response) => {
   const userId = req.params.userId as string;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const cursor = req.query.cursor as string | undefined;
+  const { limit, skip } = parsePagination(req.query);
 
   try {
-    const posts = await getPostsByUserIdService({ userId, limit, cursor });
-    return res.status(200).json(posts);
+    const { username, email, profilePic, bio, posts, totalItems } =
+      await getPostsByUserIdService({ userId, limit, skip });
+    const { page, totalPages, hasNextPage, isFirstPage, isLastPage } =
+      parsePagination(req.query, undefined, totalItems);
+
+    return res.status(200).json({
+      username,
+      email,
+      profilePic,
+      bio,
+      posts,
+      page,
+      totalPages,
+      hasNextPage,
+      isFirstPage,
+      isLastPage,
+    });
   } catch (error) {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
