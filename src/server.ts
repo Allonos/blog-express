@@ -4,6 +4,7 @@ import "dotenv/config";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./lib/db";
+import passport from "@/src/lib/passport";
 
 import authRoutes from "@/src/routes/authRoutes";
 import userRoutes from "@/src/routes/userRoutes";
@@ -21,6 +22,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 
 app.get("/", (req, res) => {
   res.send("API running");

@@ -23,9 +23,34 @@ export const signupUser = async (
   };
 };
 
+export const googleAuthUser = async (
+  googleId: string,
+  email: string,
+  username: string,
+  profilePic: string,
+) => {
+  let user = await User.findOne({ googleId });
+  if (user) return user;
+
+  user = await User.findOne({ email });
+  if (user) {
+    user.googleId = googleId;
+    if (!user.profilePic) user.profilePic = profilePic;
+    await user.save();
+    return user;
+  }
+
+  user = new User({ googleId, email, username, profilePic });
+  await user.save();
+  return user;
+};
+
 export const loginUser = async (email: string, password: string) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user) throw new AppError(400, "Invalid credentials");
+
+  if (!user.password)
+    throw new AppError(400, "This account uses Google Sign-In");
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new AppError(400, "Invalid credentials");

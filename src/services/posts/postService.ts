@@ -101,8 +101,6 @@ export const getPostsByUserId = async ({
   const data = hasNextPage ? posts.slice(0, limit) : posts;
   const nextCursor = hasNextPage ? data[data.length - 1]._id.toString() : null;
 
-  if (!posts.length) throw new AppError(404, "No posts found for this user");
-
   return {
     username: user.username,
     email: user.email,

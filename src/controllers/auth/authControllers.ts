@@ -4,6 +4,16 @@ import { signupUser, loginUser } from "@/src/services/auth/authService";
 import { AppError } from "@/src/lib/AppError";
 import "dotenv/config";
 
+type GoogleUser = {
+  _id: { toString(): string };
+};
+
+export const googleCallback = (req: Request, res: Response) => {
+  const user = req.user as GoogleUser;
+  generateToken(user._id.toString(), res);
+  res.redirect(process.env.CLIENT_URL || "http://localhost:5173");
+};
+
 export const signup = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
 
