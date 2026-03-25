@@ -1,6 +1,7 @@
 import cloudinary from "@/src/lib/cloudinary";
 import { AuthRequest } from "@/src/middleware/protectRoute";
 import Message from "@/src/models/Message";
+import User from "@/src/models/User";
 import { Response } from "express";
 
 export const getMessagesByUserId = async (req: AuthRequest, res: Response) => {
@@ -13,7 +14,7 @@ export const getMessagesByUserId = async (req: AuthRequest, res: Response) => {
         { senderId: myId, recieverId: userToChatId },
         { senderId: userToChatId, recieverId: myId },
       ],
-    });
+    }).populate("recieverId", "username profilePic");
 
     res.status(200).json(messages);
   } catch (error) {
@@ -34,7 +35,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
         .json({ message: "Cannot send message to yourself" });
     }
 
-    const recieverExists = await Message.exists({ recieverId });
+    const recieverExists = await User.exists({ _id: recieverId });
     if (!recieverExists) {
       return res.status(404).json({ message: "Reciever not found" });
     }
