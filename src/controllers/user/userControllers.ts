@@ -2,8 +2,11 @@ import { Request, Response } from "express";
 import {
   updateUserProfile,
   searchUsersByUsername,
+  getAllUsers,
+  getTextedUsers,
 } from "@/src/services/user/userService";
 import { AppError } from "@/src/lib/AppError";
+import { AuthRequest } from "@/src/middleware/protectRoute";
 
 export const updateProfile = async (req: Request, res: Response) => {
   const { username, bio, profilePic } = req.body;
@@ -38,6 +41,30 @@ export const getUserByUsername = async (req: Request, res: Response) => {
       return res.status(error.statusCode).json({ message: error.message });
     }
     console.error("Error in getUserByUsername", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getUsers = async (req: AuthRequest, res: Response) => {
+  const userId = req.user._id as string;
+
+  try {
+    const users = await getAllUsers(userId);
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error in getUsers", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getTextedContacts = async (req: AuthRequest, res: Response) => {
+  const userId = req.user._id as string;
+
+  try {
+    const users = await getTextedUsers(userId);
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error in getTextedContacts", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

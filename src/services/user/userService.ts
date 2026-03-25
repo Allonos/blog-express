@@ -1,6 +1,7 @@
 import User from "@/src/models/User";
 import cloudinary from "@/src/lib/cloudinary";
 import { AppError } from "@/src/lib/AppError";
+import Message from "@/src/models/Message";
 
 export const updateUserProfile = async (
   userId: string,
@@ -31,4 +32,17 @@ export const searchUsersByUsername = async (username: string) => {
 
   if (!users.length) throw new AppError(404, "User not found");
   return users;
+};
+
+export const getAllUsers = async (userId: string) => {
+  return User.find({ _id: { $ne: userId } }).select("-password");
+};
+
+export const getTextedUsers = async (userId: string) => {
+  const sentTo = await Message.distinct("recieverId", { senderId: userId });
+  const receivedFrom = await Message.distinct("senderId", { recieverId: userId });
+
+  const userIds = [...new Set([...sentTo, ...receivedFrom].map((id) => id.toString()))];
+
+  return User.find({ _id: { $in: userIds, $ne: userId } }).select("-password");
 };
