@@ -3,6 +3,12 @@ import cloudinary from "@/src/lib/cloudinary";
 import { AppError } from "@/src/lib/AppError";
 import Message from "@/src/models/Message";
 
+interface GetAllUsersParams {
+  userId: string;
+  limit: number;
+  skip: number;
+}
+
 export const updateUserProfile = async (
   userId: string,
   data: { username?: string; bio?: string; profilePic?: string },
@@ -34,15 +40,42 @@ export const searchUsersByUsername = async (username: string) => {
   return users;
 };
 
-export const getAllUsers = async (userId: string) => {
-  return User.find({ _id: { $ne: userId } }).select("-password");
+export const getAllUsers = async ({
+  userId,
+  limit,
+  skip,
+}: GetAllUsersParams) => {
+  const [users, totalItems] = await Promise.all([
+    User.find({ _id: { $ne: userId } })
+      .skip(skip)
+      .limit(limit)
+      .select("-password"),
+    User.countDocuments({ _id: { $ne: userId } }),
+  ]);
+
+  return { users, totalItems };
 };
 
-export const getTextedUsers = async (userId: string) => {
+export const getTextedUsers = async ({
+  userId,
+  limit,
+  skip,
+}: GetAllUsersParams) => {
   const sentTo = await Message.distinct("recieverId", { senderId: userId });
-  const receivedFrom = await Message.distinct("senderId", { recieverId: userId });
+  const receivedFrom = await Message.distinct("senderId", {
+    recieverId: userId,
+  });
 
-  const userIds = [...new Set([...sentTo, ...receivedFrom].map((id) => id.toString()))];
+  const userIds = [
+    ...new Set([...sentTo, ...receivedFrom].map((id) => id.toString())),
+  ];
 
-  return User.find({ _id: { $in: userIds, $ne: userId } }).select("-password");
+  const filter = { _id: { $in: userIds, $ne: userId } };
+
+  const [users, totalItems] = await Promise.all([
+    User.find(filter).skip(skip).limit(limit).select("-password"),
+    User.countDocuments(filter),
+  ]);
+
+  return { users, totalItems };
 };

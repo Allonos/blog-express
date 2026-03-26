@@ -4,16 +4,39 @@ import Message from "@/src/models/Message";
 import User from "@/src/models/User";
 import { Types } from "mongoose";
 
-export const getMessagesByUserId = async (
-  myId: string,
-  userToChatId: string,
-) => {
-  return Message.find({
-    $or: [
-      { senderId: myId, recieverId: userToChatId },
-      { senderId: userToChatId, recieverId: myId },
-    ],
-  }).populate("recieverId", "username profilePic");
+interface GetMessagesByUserIdParams {
+  limit: number;
+  skip: number;
+  myId: string;
+  userToChatId: string;
+}
+
+export const getMessagesByUserId = async ({
+  myId,
+  userToChatId,
+  limit,
+  skip,
+}: GetMessagesByUserIdParams) => {
+  const [messages, totalItems] = await Promise.all([
+    Message.find({
+      $or: [
+        { senderId: myId, recieverId: userToChatId },
+        { senderId: userToChatId, recieverId: myId },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("recieverId", "username profilePic"),
+    Message.countDocuments({
+      $or: [
+        { senderId: myId, recieverId: userToChatId },
+        { senderId: userToChatId, recieverId: myId },
+      ],
+    }),
+  ]);
+
+  return { messages: messages.reverse(), totalItems };
 };
 
 export const sendMessage = async (

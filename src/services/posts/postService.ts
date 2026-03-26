@@ -53,7 +53,6 @@ export const getAllPosts = async ({ limit, skip }: GetAllPostsParams) => {
     Post.countDocuments(),
   ]);
 
-  if (!posts.length) throw new AppError(404, "No posts found");
   return { posts, totalItems };
 };
 

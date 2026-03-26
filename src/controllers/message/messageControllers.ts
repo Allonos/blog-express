@@ -6,11 +6,28 @@ import {
 } from "@/src/services/message/messageService";
 import { io } from "@/src/lib/socket";
 import { Response } from "express";
+import { parsePagination } from "@/src/lib/pagination";
 
 export const getMessagesByUserId = async (req: AuthRequest, res: Response) => {
   try {
-    const messages = await getMessages(req.user._id, req.params.id as string);
-    res.status(200).json(messages);
+    const { limit, skip } = parsePagination(req.query);
+    const { messages, totalItems } = await getMessages({
+      myId: req.user._id.toString(),
+      userToChatId: req.params.id as string,
+      limit,
+      skip,
+    });
+    const { page, totalPages, hasNextPage, isFirstPage, isLastPage } =
+      parsePagination(req.query, undefined, totalItems);
+
+    res.status(200).json({
+      messages,
+      page,
+      totalPages,
+      hasNextPage,
+      isFirstPage,
+      isLastPage,
+    });
   } catch (error) {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });

@@ -7,6 +7,7 @@ import {
 } from "@/src/services/user/userService";
 import { AppError } from "@/src/lib/AppError";
 import { AuthRequest } from "@/src/middleware/protectRoute";
+import { parsePagination } from "@/src/lib/pagination";
 
 export const updateProfile = async (req: Request, res: Response) => {
   const { username, bio, profilePic } = req.body;
@@ -49,8 +50,19 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
   const userId = req.user._id as string;
 
   try {
-    const users = await getAllUsers(userId);
-    return res.status(200).json(users);
+    const { limit, skip } = parsePagination(req.query);
+    const { users, totalItems } = await getAllUsers({ userId, limit, skip });
+    const { page, totalPages, hasNextPage, isFirstPage, isLastPage } =
+      parsePagination(req.query, undefined, totalItems);
+
+    return res.status(200).json({
+      users,
+      page,
+      totalPages,
+      hasNextPage,
+      isFirstPage,
+      isLastPage,
+    });
   } catch (error) {
     console.error("Error in getUsers", error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -59,10 +71,21 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
 
 export const getTextedContacts = async (req: AuthRequest, res: Response) => {
   const userId = req.user._id as string;
+  const { limit, skip } = parsePagination(req.query);
 
   try {
-    const users = await getTextedUsers(userId);
-    return res.status(200).json(users);
+    const { users, totalItems } = await getTextedUsers({ userId, limit, skip });
+    const { page, totalPages, hasNextPage, isFirstPage, isLastPage } =
+      parsePagination(req.query, undefined, totalItems);
+
+    return res.status(200).json({
+      users,
+      page,
+      totalPages,
+      hasNextPage,
+      isFirstPage,
+      isLastPage,
+    });
   } catch (error) {
     console.error("Error in getTextedContacts", error);
     return res.status(500).json({ message: "Internal Server Error" });
