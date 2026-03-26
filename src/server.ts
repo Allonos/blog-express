@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import "dotenv/config";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./lib/db";
 import passport from "@/src/lib/passport";
+import { app, server } from "@/src/lib/socket";
 
 import authRoutes from "@/src/routes/authRoutes";
 import userRoutes from "@/src/routes/userRoutes";
@@ -12,7 +12,6 @@ import postRoutes from "@/src/routes/postRoutes";
 import commentRoutes from "@/src/routes/commentRoutes";
 import messageRoutes from "@/src/routes/messageRoutes";
 
-const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(
@@ -36,7 +35,7 @@ app.use("/api/comment", commentRoutes);
 app.use("/api/message", messageRoutes);
 
 connectDB().then(() => {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 });
