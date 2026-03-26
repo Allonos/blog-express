@@ -9,6 +9,12 @@ interface GetAllUsersParams {
   skip: number;
 }
 
+interface SearchUsersParams {
+  username: string;
+  limit: number;
+  skip: number;
+}
+
 export const updateUserProfile = async (
   userId: string,
   data: { username?: string; bio?: string; profilePic?: string },
@@ -31,13 +37,23 @@ export const updateUserProfile = async (
   return user;
 };
 
-export const searchUsersByUsername = async (username: string) => {
-  const users = await User.find({
-    username: { $regex: username, $options: "i" },
-  });
+export const searchUsersByUsername = async ({
+  username,
+  limit,
+  skip,
+}: SearchUsersParams) => {
+  const [users, totalItems] = await Promise.all([
+    User.find({
+      username: { $regex: username, $options: "i" },
+    })
+      .skip(skip)
+      .limit(limit),
+    User.countDocuments({
+      username: { $regex: username, $options: "i" },
+    }),
+  ]);
 
-  if (!users.length) throw new AppError(404, "User not found");
-  return users;
+  return { users, totalItems };
 };
 
 export const getAllUsers = async ({

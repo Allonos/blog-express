@@ -33,10 +33,25 @@ export const updateProfile = async (req: Request, res: Response) => {
 
 export const getUserByUsername = async (req: Request, res: Response) => {
   const { username } = req.query;
+  const { limit, skip } = parsePagination(req.query);
 
   try {
-    const users = await searchUsersByUsername(username as string);
-    return res.status(200).json(users);
+    const { users, totalItems } = await searchUsersByUsername({
+      username: username as string,
+      limit,
+      skip,
+    });
+    const { page, totalPages, hasNextPage, isFirstPage, isLastPage } =
+      parsePagination(req.query, undefined, totalItems);
+
+    return res.status(200).json({
+      users,
+      page,
+      totalPages,
+      hasNextPage,
+      isFirstPage,
+      isLastPage,
+    });
   } catch (error) {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
