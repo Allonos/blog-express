@@ -3,14 +3,14 @@ import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./lib/db";
-import passport from "@/src/lib/passport";
-import { app, server } from "@/src/lib/socket";
+import passport from "@/lib/passport";
+import { app, server } from "@/lib/socket";
 
-import authRoutes from "@/src/routes/authRoutes";
-import userRoutes from "@/src/routes/userRoutes";
-import postRoutes from "@/src/routes/postRoutes";
-import commentRoutes from "@/src/routes/commentRoutes";
-import messageRoutes from "@/src/routes/messageRoutes";
+import authRoutes from "@/routes/authRoutes";
+import userRoutes from "@/routes/userRoutes";
+import postRoutes from "@/routes/postRoutes";
+import commentRoutes from "@/routes/commentRoutes";
+import messageRoutes from "@/routes/messageRoutes";
 
 const PORT = process.env.PORT || 8080;
 

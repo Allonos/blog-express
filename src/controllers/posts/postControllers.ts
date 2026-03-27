@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "@/src/middleware/protectRoute";
+import { AuthRequest } from "@/middleware/protectRoute";
 import {
   createPost as createPostService,
   getAllPosts as getAllPostsService,
@@ -7,9 +7,9 @@ import {
   getPostsByUserId as getPostsByUserIdService,
   toggleLikePost,
   deletePost as deletePostService,
-} from "@/src/services/posts/postService";
-import { AppError } from "@/src/lib/AppError";
-import { parsePagination } from "@/src/lib/pagination";
+} from "@/services/posts/postService";
+import { AppError } from "@/lib/AppError";
+import { parsePagination } from "@/lib/pagination";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   const { description, image } = req.body;

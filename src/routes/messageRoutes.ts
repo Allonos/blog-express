@@ -2,8 +2,8 @@ import express from "express";
 import {
   getMessagesByUserId,
   sendMessage,
-} from "@/src/controllers/message/messageControllers";
-import { protectRoute } from "@/src/middleware/protectRoute";
+} from "@/controllers/message/messageControllers";
+import { protectRoute } from "@/middleware/protectRoute";
 
 const router = express.Router();
 

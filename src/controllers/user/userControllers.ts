@@ -4,10 +4,10 @@ import {
   searchUsersByUsername,
   getAllUsers,
   getTextedUsers,
-} from "@/src/services/user/userService";
-import { AppError } from "@/src/lib/AppError";
-import { AuthRequest } from "@/src/middleware/protectRoute";
-import { parsePagination } from "@/src/lib/pagination";
+} from "@/services/user/userService";
+import { AppError } from "@/lib/AppError";
+import { AuthRequest } from "@/middleware/protectRoute";
+import { parsePagination } from "@/lib/pagination";
 
 export const updateProfile = async (req: Request, res: Response) => {
   const { username, bio, profilePic } = req.body;

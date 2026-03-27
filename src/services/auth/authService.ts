@@ -1,6 +1,6 @@
-import User from "@/src/models/User";
+import User from "@/models/User";
 import bcrypt from "bcrypt";
-import { AppError } from "@/src/lib/AppError";
+import { AppError } from "@/lib/AppError";
 
 export const signupUser = async (
   username: string,

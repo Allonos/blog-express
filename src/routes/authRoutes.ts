@@ -4,9 +4,9 @@ import {
   logout,
   signup,
   googleCallback,
-} from "@/src/controllers/auth/authControllers";
-import { AuthRequest, protectRoute } from "@/src/middleware/protectRoute";
-import passport from "@/src/lib/passport";
+} from "@/controllers/auth/authControllers";
+import { AuthRequest, protectRoute } from "@/middleware/protectRoute";
+import passport from "@/lib/passport";
 
 const router = express.Router();
 

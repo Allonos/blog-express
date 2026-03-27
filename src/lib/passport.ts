@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { googleAuthUser } from "@/src/services/auth/authService";
+import { googleAuthUser } from "@/services/auth/authService";
 import "dotenv/config";
 
 passport.use(

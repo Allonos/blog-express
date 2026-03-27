@@ -1,12 +1,12 @@
-import { AuthRequest } from "@/src/middleware/protectRoute";
+import { AuthRequest } from "@/middleware/protectRoute";
 import { Response } from "express";
 import {
   addComment,
   removeComment,
   addReply,
   removeReply,
-} from "@/src/services/comment/commentService";
-import { AppError } from "@/src/lib/AppError";
+} from "@/services/comment/commentService";
+import { AppError } from "@/lib/AppError";
 
 export const commentOnPost = async (req: AuthRequest, res: Response) => {
   const postId = req.params.postId as string;

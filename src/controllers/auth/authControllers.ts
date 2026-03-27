@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { generateToken } from "@/src/lib/utils";
-import { signupUser, loginUser } from "@/src/services/auth/authService";
-import { AppError } from "@/src/lib/AppError";
+import { generateToken } from "@/lib/utils";
+import { signupUser, loginUser } from "@/services/auth/authService";
+import { AppError } from "@/lib/AppError";
 import "dotenv/config";
 
 type GoogleUser = {

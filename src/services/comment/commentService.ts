@@ -1,6 +1,6 @@
-import Comment from "@/src/models/Comment";
-import Post from "@/src/models/Post";
-import { AppError } from "@/src/lib/AppError";
+import Comment from "@/models/Comment";
+import Post from "@/models/Post";
+import { AppError } from "@/lib/AppError";
 
 export const addComment = async (
   postId: string,

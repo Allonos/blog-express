@@ -1,12 +1,12 @@
-import { AppError } from "@/src/lib/AppError";
-import { AuthRequest } from "@/src/middleware/protectRoute";
+import { AppError } from "@/lib/AppError";
+import { AuthRequest } from "@/middleware/protectRoute";
 import {
   getMessagesByUserId as getMessages,
   sendMessage as send,
-} from "@/src/services/message/messageService";
-import { io } from "@/src/lib/socket";
+} from "@/services/message/messageService";
+import { io } from "@/lib/socket";
 import { Response } from "express";
-import { parsePagination } from "@/src/lib/pagination";
+import { parsePagination } from "@/lib/pagination";
 
 export const getMessagesByUserId = async (req: AuthRequest, res: Response) => {
   try {

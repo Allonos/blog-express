@@ -1,7 +1,7 @@
-import cloudinary from "@/src/lib/cloudinary";
-import Post from "@/src/models/Post";
-import User from "@/src/models/User";
-import { AppError } from "@/src/lib/AppError";
+import cloudinary from "@/lib/cloudinary";
+import Post from "@/models/Post";
+import User from "@/models/User";
+import { AppError } from "@/lib/AppError";
 import { Types } from "mongoose";
 
 interface GetAllPostsParams {

@@ -6,7 +6,7 @@ import {
   getPostById,
   getPostsByUserId,
   likePost,
-} from "@/src/controllers/posts/postControllers";
+} from "@/controllers/posts/postControllers";
 import { protectRoute } from "../middleware/protectRoute";
 
 const router = experss.Router();

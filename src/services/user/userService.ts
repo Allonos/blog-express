@@ -1,7 +1,7 @@
-import User from "@/src/models/User";
-import cloudinary from "@/src/lib/cloudinary";
-import { AppError } from "@/src/lib/AppError";
-import Message from "@/src/models/Message";
+import User from "@/models/User";
+import cloudinary from "@/lib/cloudinary";
+import { AppError } from "@/lib/AppError";
+import Message from "@/models/Message";
 
 interface GetAllUsersParams {
   userId: string;
