@@ -8,12 +8,13 @@ import {
   likePost,
 } from "@/controllers/posts/postControllers";
 import { protectRoute } from "../middleware/protectRoute";
+import upload from "../middleware/upload";
 
 const router = experss.Router();
 
 router.use(protectRoute);
 
-router.post("/create", createPost);
+router.post("/create", upload.single("image"), createPost);
 
 router.get("/get-all-posts", getAllPosts);
 

@@ -21,15 +21,26 @@ const commentPopulate = {
 export const createPost = async (
   userId: string,
   description: string,
-  image?: string,
+  imageBuffer?: Buffer,
 ) => {
   const user = await User.findById(userId);
   if (!user) throw new AppError(404, "User not found");
 
   let imageUrl: string | undefined;
-  if (image) {
-    const uploaded = await cloudinary.uploader.upload(image);
-    imageUrl = uploaded.secure_url;
+  if (imageBuffer) {
+    const uploadResult = await new Promise<{ secure_url: string }>(
+      (resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image" },
+          (error, result) => {
+            if (error || !result) reject(error);
+            else resolve(result);
+          },
+        );
+        stream.end(imageBuffer);
+      },
+    );
+    imageUrl = uploadResult.secure_url;
   }
 
   const newPost = await Post.create({

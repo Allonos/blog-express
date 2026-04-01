@@ -12,15 +12,16 @@ import { AppError } from "@/lib/AppError";
 import { parsePagination } from "@/lib/pagination";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
-  const { description, image } = req.body;
+  const { description } = req.body;
   const userId = req.user._id.toString();
+  const imageBuffer = req.file?.buffer;
 
   if (!description) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const post = await createPostService(userId, description, image);
+    const post = await createPostService(userId, description, imageBuffer);
     return res.status(201).json(post);
   } catch (error) {
     if (error instanceof AppError) {

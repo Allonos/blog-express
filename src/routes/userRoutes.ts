@@ -6,10 +6,16 @@ import {
   getTextedContacts,
 } from "../controllers/user/userControllers";
 import { protectRoute } from "../middleware/protectRoute";
+import upload from "../middleware/upload";
 
 const router = express.Router();
 
-router.patch("/update/:id", protectRoute, updateProfile);
+router.patch(
+  "/update/:id",
+  protectRoute,
+  upload.single("profilePic"),
+  updateProfile,
+);
 
 router.get("/find-user", protectRoute, getUserByUsername);
 

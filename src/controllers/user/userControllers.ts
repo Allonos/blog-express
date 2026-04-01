@@ -10,17 +10,22 @@ import { AuthRequest } from "@/middleware/protectRoute";
 import { parsePagination } from "@/lib/pagination";
 
 export const updateProfile = async (req: Request, res: Response) => {
-  const { username, bio, profilePic } = req.body;
+  const { username, bio } = req.body;
   const userId = req.params.id as string;
+  const profilePicBuffer = req.file?.buffer;
 
-  if (!username && !bio && !profilePic) {
+  if (!username && !bio && !profilePicBuffer) {
     return res.status(400).json({
       message: "Provide a username, bio, or profile picture to update",
     });
   }
 
   try {
-    const user = await updateUserProfile(userId, { username, bio, profilePic });
+    const user = await updateUserProfile(userId, {
+      username,
+      bio,
+      profilePicBuffer,
+    });
     return res.status(200).json(user);
   } catch (error) {
     if (error instanceof AppError) {

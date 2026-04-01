@@ -17,15 +17,26 @@ interface SearchUsersParams {
 
 export const updateUserProfile = async (
   userId: string,
-  data: { username?: string; bio?: string; profilePic?: string },
+  data: { username?: string; bio?: string; profilePicBuffer?: Buffer },
 ) => {
   const updates: { username?: string; bio?: string; profilePic?: string } = {};
 
   if (data.username) updates.username = data.username;
   if (data.bio) updates.bio = data.bio;
-  if (data.profilePic) {
-    const uploadResponse = await cloudinary.uploader.upload(data.profilePic);
-    updates.profilePic = uploadResponse.secure_url;
+  if (data.profilePicBuffer) {
+    const uploadResult = await new Promise<{ secure_url: string }>(
+      (resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image" },
+          (error, result) => {
+            if (error || !result) reject(error);
+            else resolve(result);
+          },
+        );
+        stream.end(data.profilePicBuffer);
+      },
+    );
+    updates.profilePic = uploadResult.secure_url;
   }
 
   const user = await User.findOneAndUpdate({ _id: userId }, updates, {
